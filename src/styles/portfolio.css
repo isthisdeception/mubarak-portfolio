@@ -1,0 +1,588 @@
+/* Mubarak Portfolio — Work & Portfolio Styles */
+
+/* ==========================================================================
+   Portfolio Hub Header
+   ========================================================================== */
+.work-page {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-20);
+}
+
+@media (min-width: 768px) {
+  .work-page {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-24);
+  }
+}
+
+.work-header {
+  margin-bottom: clamp(3rem, 6vw, 6rem);
+}
+
+.work-header-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-accent);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-4);
+}
+
+.work-header-meta::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background-color: var(--color-accent);
+}
+
+.work-header-title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7.5vw, 6.5rem);
+  font-weight: 300;
+  line-height: 0.98;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-4);
+}
+
+.work-header-desc {
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  line-height: var(--leading-relaxed);
+}
+
+/* ==========================================================================
+   Discipline Chapter Entry Cards (Book-Chapter Feel)
+   ========================================================================== */
+.discipline-chapters {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4rem, 8vw, 7rem);
+  margin-bottom: clamp(6rem, 10vw, 10rem);
+}
+
+.discipline-chapter-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+  text-decoration: none;
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-8);
+  transition: border-color var(--duration-fast) var(--ease-smooth);
+}
+
+@media (min-width: 900px) {
+  .discipline-chapter-card {
+    grid-template-columns: 0.9fr 1.1fr;
+    align-items: center;
+    gap: var(--space-12);
+  }
+}
+
+.discipline-chapter-card:hover {
+  border-color: var(--color-border-hover);
+}
+
+.chapter-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.chapter-number {
+  font-family: var(--font-accent);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.chapter-name {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+  font-weight: 300;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+  transition: color var(--duration-fast) var(--ease-smooth);
+}
+
+.discipline-chapter-card:hover .chapter-name {
+  color: var(--color-accent);
+}
+
+.chapter-tagline {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+  max-width: 480px;
+}
+
+.chapter-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  margin-top: var(--space-2);
+  transition: transform var(--duration-fast) var(--ease-smooth);
+}
+
+.discipline-chapter-card:hover .chapter-action {
+  transform: translateX(6px);
+  color: var(--color-accent);
+}
+
+.chapter-media {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background-color: var(--color-surface);
+  position: relative;
+}
+
+.chapter-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-cinematic);
+  filter: brightness(0.92) contrast(1.04);
+}
+
+.discipline-chapter-card:hover .chapter-img {
+  transform: scale(1.035);
+  filter: brightness(0.98) contrast(1.06);
+}
+
+/* ==========================================================================
+   Filter Bars (Quiet Minimalist Typography)
+   ========================================================================== */
+.portfolio-filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-bottom: clamp(3rem, 5vw, 5rem);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+@media (min-width: 768px) {
+  .portfolio-filter-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+}
+
+.filter-btn {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  position: relative;
+  transition: color var(--duration-fast) var(--ease-smooth);
+}
+
+.filter-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.filter-btn.active {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.filter-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background-color: var(--color-accent);
+}
+
+.filter-count {
+  font-family: var(--font-accent);
+  font-size: 0.65rem;
+  color: var(--color-text-dim);
+  margin-left: 4px;
+}
+
+.filter-btn.active .filter-count {
+  color: var(--color-accent);
+}
+
+/* ==========================================================================
+   Spacious Editorial Gallery Grid
+   ========================================================================== */
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(3.5rem, 6vw, 6.5rem);
+}
+
+@media (min-width: 768px) {
+  .portfolio-grid {
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+    column-gap: clamp(2.5rem, 5vw, 5rem);
+  }
+
+  /* Editorial Stagger for second column */
+  .portfolio-grid > *:nth-child(2n) {
+    margin-top: clamp(2rem, 4vw, 4.5rem);
+  }
+}
+
+.gallery-card {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  text-align: left;
+  width: 100%;
+}
+
+.gallery-card-media {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--color-surface);
+}
+
+.gallery-card-media.aspect-portrait {
+  aspect-ratio: 3 / 4;
+}
+
+.gallery-card-media.aspect-landscape {
+  aspect-ratio: 4 / 3;
+}
+
+.gallery-card-media.aspect-wide {
+  aspect-ratio: 16 / 9;
+}
+
+.gallery-card-media.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.gallery-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-cinematic),
+              filter var(--duration-base) var(--ease-smooth);
+  filter: brightness(0.93) contrast(1.02);
+}
+
+.gallery-card:hover .gallery-card-img {
+  transform: scale(1.04);
+  filter: brightness(1) contrast(1.06);
+}
+
+.media-type-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(9, 10, 12, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--font-accent);
+  font-size: 0.65rem;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  padding: 4px 8px;
+}
+
+.gallery-card-caption {
+  padding-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.gallery-card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.gallery-card-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-weight: 400;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+  transition: color var(--duration-fast) var(--ease-smooth);
+}
+
+.gallery-card:hover .gallery-card-title {
+  color: var(--color-accent);
+}
+
+.gallery-card-year {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.gallery-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.gallery-card-category {
+  font-family: var(--font-accent);
+  font-size: 0.7rem;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* ==========================================================================
+   Discipline Page Specifics
+   ========================================================================== */
+.discipline-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-6);
+  transition: color var(--duration-fast) var(--ease-smooth);
+}
+
+.discipline-back-link:hover {
+  color: var(--color-text-primary);
+}
+
+.discipline-nav-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  padding-top: var(--space-12);
+  margin-top: var(--space-16);
+  border-top: 1px solid var(--color-border-subtle);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.discipline-nav-item {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+  font-weight: 300;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-smooth);
+}
+
+.discipline-nav-item:hover,
+.discipline-nav-item.active {
+  color: var(--color-text-primary);
+}
+
+/* ==========================================================================
+   Lightbox Modal (Keyboard accessible, quiet luxury presentation)
+   ========================================================================== */
+.lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: rgba(6, 7, 8, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  animation: fadeIn var(--duration-base) var(--ease-smooth);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.lightbox-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: var(--container-pad);
+  z-index: 10;
+}
+
+.lightbox-counter {
+  font-family: var(--font-accent);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.lightbox-close-btn {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.lightbox-close-btn:hover {
+  border-color: var(--color-text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.lightbox-body {
+  max-width: 1200px;
+  width: 100%;
+  max-height: calc(100vh - 160px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-top: 40px;
+}
+
+.lightbox-media-container {
+  max-width: 100%;
+  max-height: 65vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.lightbox-image {
+  max-width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+.lightbox-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(15, 17, 21, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all var(--duration-fast) var(--ease-smooth);
+  z-index: 5;
+}
+
+.lightbox-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--color-text-primary);
+}
+
+.lightbox-nav-prev {
+  left: -20px;
+}
+
+.lightbox-nav-next {
+  right: -20px;
+}
+
+@media (max-width: 768px) {
+  .lightbox-nav-prev {
+    left: 8px;
+  }
+  .lightbox-nav-next {
+    right: 8px;
+  }
+}
+
+.lightbox-caption {
+  width: 100%;
+  max-width: 800px;
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.lightbox-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: 400;
+  color: var(--color-text-primary);
+}
+
+.lightbox-meta-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: var(--tracking-wide);
+  flex-wrap: wrap;
+}
+
+.lightbox-discipline-tag {
+  font-family: var(--font-accent);
+  color: var(--color-accent);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+}
+
+.lightbox-desc {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+  max-width: 600px;
+  margin-inline: auto;
+}

@@ -1,0 +1,371 @@
+/* Mubarak Portfolio — About Page Styles (Editorial Profile) */
+
+.about-page {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-24);
+}
+
+@media (min-width: 768px) {
+  .about-page {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-32);
+  }
+}
+
+/* ==========================================================================
+   Section 1: Artist Profile & Portrait Anchor
+   ========================================================================== */
+.about-hero-section {
+  margin-bottom: clamp(5rem, 10vw, 9rem);
+}
+
+.about-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(3rem, 6vw, 6.5rem);
+}
+
+@media (min-width: 960px) {
+  .about-profile-grid {
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: start;
+  }
+}
+
+.about-intro-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.about-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-accent);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.about-meta::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background-color: var(--color-accent);
+}
+
+.about-name {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 8vw, 6.5rem);
+  font-weight: 300;
+  line-height: 0.95;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.about-role-sub {
+  font-family: var(--font-accent);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.about-headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.3rem);
+  font-weight: 400;
+  color: var(--color-text-primary);
+  line-height: 1.25;
+  margin-top: var(--space-2);
+}
+
+.about-body-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 580px;
+}
+
+.about-body-text p {
+  font-family: var(--font-sans);
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* Portrait Visual Anchor */
+.about-portrait-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.about-portrait-frame {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background-color: var(--color-surface);
+  position: relative;
+}
+
+.about-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  filter: brightness(0.92) contrast(1.05);
+  transition: transform var(--duration-cinematic) var(--ease-cinematic);
+}
+
+.about-portrait-frame:hover .about-portrait-img {
+  transform: scale(1.025);
+}
+
+.about-portrait-caption {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: var(--tracking-wide);
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+/* ==========================================================================
+   Section 2: Creative Philosophy (Tenets)
+   ========================================================================== */
+.about-philosophy-section {
+  padding-block: clamp(4rem, 8vw, 7rem);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.philosophy-header {
+  margin-bottom: clamp(3rem, 6vw, 5rem);
+  max-width: 840px;
+}
+
+.philosophy-title {
+  font-family: var(--font-accent);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-4);
+}
+
+.philosophy-statement {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  font-style: italic;
+}
+
+.philosophy-tenets-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+@media (min-width: 860px) {
+  .philosophy-tenets-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.tenet-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-6);
+}
+
+.tenet-number {
+  font-family: var(--font-accent);
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  letter-spacing: var(--tracking-widest);
+}
+
+.tenet-title {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
+}
+
+.tenet-desc {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* ==========================================================================
+   Section 3: Skills & Disciplines (Refined Typographic List)
+   ========================================================================== */
+.about-skills-section {
+  padding-block: clamp(4rem, 8vw, 7rem);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.skills-header {
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+@media (min-width: 768px) {
+  .skills-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.skill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-family: var(--font-sans);
+  font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+  color: var(--color-text-secondary);
+  transition: color var(--duration-fast) var(--ease-smooth),
+              padding-left var(--duration-fast) var(--ease-smooth);
+}
+
+.skill-row:hover {
+  color: var(--color-text-primary);
+  padding-left: var(--space-6);
+}
+
+.skill-bullet {
+  font-family: var(--font-accent);
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   Section 4: Production Craft & Equipment
+   ========================================================================== */
+.about-equipment-section {
+  padding-block: clamp(4rem, 8vw, 7rem);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.equipment-header {
+  margin-bottom: clamp(3rem, 6vw, 5rem);
+  max-width: 680px;
+}
+
+.equipment-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+@media (min-width: 680px) {
+  .equipment-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .equipment-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.equipment-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.equipment-group-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: var(--space-2);
+}
+
+.equipment-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.equipment-item {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* ==========================================================================
+   Section 5: Professional Notes & Bottom Dialogue
+   ========================================================================== */
+.about-notes-section {
+  padding-top: clamp(4rem, 8vw, 7rem);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-bottom: clamp(4rem, 8vw, 7rem);
+}
+
+@media (min-width: 768px) {
+  .notes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+.note-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.note-label {
+  font-family: var(--font-accent);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.note-value {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  line-height: var(--leading-normal);
+}
+
+.about-footer-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-6);
+  padding-top: var(--space-12);
+  border-top: 1px solid var(--color-border-subtle);
+}
