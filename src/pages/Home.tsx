@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { homeData } from '../data/home';
-import { siteData } from '../data/site';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export const Home: React.FC = () => {
@@ -17,66 +16,44 @@ export const Home: React.FC = () => {
   return (
     <div className="home-page reveal-fade">
       {/* ====================================================================
-          Hero Section
+          Cinematic Hero Section (Full-Bleed Atmospheric Canvas)
           ==================================================================== */}
-      <section className="home-hero" aria-label="Introduction & Hero">
-        <div className="container">
-          <div className="hero-header reveal-slide-up">
-            <div className="hero-title-row">
-              <h1 className="hero-name">{homeData.displayName}</h1>
-              <div className="hero-meta">
-                <span className="hero-roles">{siteData.tagline}</span>
-                <p className="hero-intro">{homeData.heroIntro}</p>
-              </div>
+      <section className="home-hero-cinematic" aria-label="Introduction & Hero">
+        {/* Full-bleed atmospheric background image */}
+        <div className="hero-backdrop-media">
+          <img
+            src={heroMedia.url}
+            alt={heroMedia.alt}
+            className="hero-backdrop-img"
+            loading="eager"
+          />
+          <div className="hero-vignette-overlay" aria-hidden="true" />
+        </div>
+
+        {/* Floating cinematic content overlay */}
+        <div className="container hero-cinematic-content">
+          {/* Top Row: Coordinates on Left, Reel Tag on Right */}
+          <div className="hero-top-row reveal-fade">
+            <span className="hero-coordinates">{homeData.coordinates}</span>
+            <Link to="/reels" className="hero-reel-badge" aria-label="Explore Reels">
+              <span className="hero-reel-dot" aria-hidden="true" />
+              <span>{homeData.reelTag}</span>
+            </Link>
+          </div>
+
+          {/* Bottom Row: Identity on Left, View Work on Right */}
+          <div className="hero-bottom-row reveal-slide-up">
+            <div className="hero-title-group">
+              <span className="hero-role-tag">{homeData.roleTag}</span>
+              <h1 className="hero-main-name">{homeData.displayName}</h1>
             </div>
-          </div>
 
-          {/* Dominant Media Plane */}
-          <div className="hero-media-wrapper">
-            <div className="hero-media-frame">
-              <img
-                src={heroMedia.url}
-                alt={heroMedia.alt}
-                className="hero-media-img"
-                loading="eager"
-              />
-              <div className="hero-media-overlay" aria-hidden="true" />
-            </div>
-          </div>
-
-          {/* Quiet Technical Caption */}
-          <div className="hero-caption-row">
-            <span className="hero-caption-text">{heroMedia.caption}</span>
-            <span className="hero-technical-text">
-              Medium Format · Anamorphic 35mm · 4K Drone
-            </span>
-          </div>
-
-          {/* Hero Action Bar: Minimal CTA & Socials */}
-          <div className="hero-action-bar">
-            <div className="hero-cta-group">
-              <Link to={homeData.ctaTarget} className="btn btn-primary btn-md">
-                {homeData.ctaLabel} →
+            <div className="hero-view-work-group">
+              <Link to={homeData.ctaTarget} className="hero-view-work-link">
+                <span>{homeData.ctaLabel}</span>
+                <span aria-hidden="true">→</span>
               </Link>
-              <Link to="/reels" className="btn btn-ghost btn-md">
-                Watch Reels
-              </Link>
-            </div>
-
-            <div className="hero-social-links" aria-label="Social Profiles">
-              {siteData.socialLinks.map((soc) => (
-                <a
-                  key={soc.platform}
-                  href={soc.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hero-social-item"
-                  aria-label={`${soc.platform} (opens in new tab)`}
-                >
-                  <span>{soc.platform}</span>
-                  <span aria-hidden="true" style={{ fontSize: '0.65rem' }}>↗</span>
-                </a>
-              ))}
+              <span className="hero-portfolio-sub">{homeData.ctaSubLabel}</span>
             </div>
           </div>
         </div>

@@ -1,3 +1,5 @@
+import heroMobarakImg from '../assets/hero-mobarak.jpg';
+
 export interface SelectedWorkItem {
   id: string;
   title: string;
@@ -12,6 +14,9 @@ export interface SelectedWorkItem {
 
 export interface HomeData {
   displayName: string;
+  roleTag: string;
+  coordinates: string;
+  reelTag: string;
   heroHeadline: string;
   heroIntro: string;
   heroMedia: {
@@ -21,6 +26,7 @@ export interface HomeData {
     caption: string;
   };
   ctaLabel: string;
+  ctaSubLabel: string;
   ctaTarget: string;
   selectedWorksSection: {
     indexLabel: string;
@@ -32,16 +38,20 @@ export interface HomeData {
 
 export const homeData: HomeData = {
   displayName: 'Mubarak',
+  roleTag: 'PHOTOGRAPHER / DRONE PILOT',
+  coordinates: '23.8103° N, 90.4125° E — DHAKA',
+  reelTag: 'REEL 35MM / 4K',
   heroHeadline: 'Visual Stories Across Light & Motion',
   heroIntro:
     'Dedicated to capturing evocative moments through high-altitude aerial perspectives, intentional 35mm composition, and atmospheric cinematography.',
   heroMedia: {
     type: 'image',
-    url: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=2000&q=85',
-    alt: 'Cinematic silhouette of photographer overlooking misty mountain valley at dawn',
-    caption: 'Field Journal 08 · High Elevation Scouting · 2025',
+    url: heroMobarakImg,
+    alt: 'Mubarak operating DJI drone outdoors in natural landscape',
+    caption: 'Field Journal 08 · Aerial Scout · 2025',
   },
-  ctaLabel: 'Explore Selected Work',
+  ctaLabel: 'View Work',
+  ctaSubLabel: 'Selected Portfolio',
   ctaTarget: '/work',
   selectedWorksSection: {
     indexLabel: '01 · Archive',
