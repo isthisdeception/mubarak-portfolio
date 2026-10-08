@@ -101,3 +101,10 @@
      Wide: >= 1440px
      ========================================================================== */
 }
+
+@media (max-width: 768px) {
+  :root {
+    --header-height: 64px;
+    --container-pad: clamp(1rem, 4.5vw, 2rem);
+  }
+}

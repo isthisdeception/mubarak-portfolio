@@ -41,11 +41,13 @@
 
 .reels-header-title {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 7.5vw, 6.5rem);
+  font-size: clamp(2.1rem, 7.5vw, 6.5rem);
   font-weight: 300;
   line-height: 0.98;
   color: var(--color-text-primary);
   margin-bottom: var(--space-4);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .reels-header-desc {
@@ -69,19 +71,42 @@
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
+@media (max-width: 768px) {
+  .reels-filter-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: var(--space-2);
+    gap: var(--space-5);
+    margin-bottom: var(--space-8);
+  }
+
+  .reels-filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .reels-filter-bar .filter-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
 /* ==========================================================================
    Reels Editorial Grid (Spacious, Video-First)
    ========================================================================== */
 .reels-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(4rem, 7vw, 7.5rem);
+  gap: clamp(2.5rem, 6vw, 7.5rem);
 }
 
 @media (min-width: 680px) {
   .reels-grid {
     grid-template-columns: repeat(2, 1fr);
     column-gap: clamp(2.5rem, 5vw, 5rem);
+    gap: clamp(4rem, 7vw, 7.5rem);
     align-items: start;
   }
 
@@ -345,6 +370,29 @@
   justify-content: center;
   margin-top: 32px;
   position: relative;
+}
+
+@media (max-width: 768px) {
+  .cinema-modal-body {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    margin-top: 48px;
+    padding-bottom: var(--space-6);
+  }
+
+  .cinema-video-container {
+    max-height: 52vh;
+  }
+
+  .cinema-video {
+    max-height: 52vh;
+  }
+
+  .cinema-nav-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+  }
 }
 
 .cinema-video-container {

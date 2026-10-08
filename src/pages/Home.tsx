@@ -279,7 +279,7 @@ export const Home: React.FC = () => {
             <p className="selected-work-footer-text">
               Visual narratives available for worldwide commission across photography, cinematography, and drone operations.
             </p>
-            <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="selected-work-footer-actions">
               <Link to="/work" className="btn btn-primary btn-md">
                 Browse Full Portfolio
               </Link>

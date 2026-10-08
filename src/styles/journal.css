@@ -42,11 +42,13 @@
 
 .journal-title {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 7.5vw, 6.5rem);
+  font-size: clamp(2.1rem, 7.5vw, 6.5rem);
   font-weight: 300;
   line-height: 0.98;
   color: var(--color-text-primary);
   margin-bottom: var(--space-4);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .journal-desc {
@@ -65,6 +67,28 @@
   padding-bottom: var(--space-6);
   margin-bottom: clamp(3rem, 6vw, 6rem);
   border-bottom: 1px solid var(--color-border-subtle);
+}
+
+@media (max-width: 768px) {
+  .journal-filter-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: var(--space-2);
+    gap: var(--space-5);
+    margin-bottom: var(--space-8);
+  }
+
+  .journal-filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .journal-filter-bar .filter-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
 /* ==========================================================================
@@ -237,11 +261,13 @@
 
 .article-title {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 5.5vw, 4.75rem);
+  font-size: clamp(1.85rem, 5.5vw, 4.75rem);
   font-weight: 300;
   line-height: 1.05;
   color: var(--color-text-primary);
   text-wrap: balance;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .article-meta-row {
@@ -259,7 +285,7 @@
 /* Article Hero Cover Frame */
 .article-cover-frame {
   width: 100%;
-  height: clamp(360px, 62vh, 720px);
+  height: clamp(280px, 55vh, 720px);
   overflow: hidden;
   background-color: var(--color-surface);
   position: relative;

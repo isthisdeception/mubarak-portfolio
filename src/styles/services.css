@@ -42,11 +42,13 @@
 
 .services-title {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 7.5vw, 6.5rem);
+  font-size: clamp(2.1rem, 7.5vw, 6.5rem);
   font-weight: 300;
   line-height: 0.98;
   color: var(--color-text-primary);
   margin-bottom: var(--space-4);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .services-desc {
@@ -62,25 +64,30 @@
 .services-group-list {
   display: flex;
   flex-direction: column;
-  gap: clamp(6rem, 12vw, 12rem);
-  margin-bottom: clamp(6rem, 12vw, 12rem);
+  gap: clamp(4rem, 8vw, 12rem);
+  margin-bottom: clamp(5rem, 10vw, 12rem);
 }
 
 .service-discipline-section {
   border-top: 1px solid var(--color-border-subtle);
-  padding-top: clamp(3rem, 6vw, 5rem);
+  padding-top: clamp(2.5rem, 5vw, 5rem);
 }
 
 .service-discipline-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(3rem, 6vw, 6.5rem);
+  gap: clamp(2.5rem, 5vw, 6.5rem);
 }
 
 @media (min-width: 960px) {
   .service-discipline-grid {
     grid-template-columns: 0.95fr 1.05fr;
     align-items: start;
+  }
+
+  .discipline-identity-col {
+    position: sticky;
+    top: 120px;
   }
 }
 
@@ -89,8 +96,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-  position: sticky;
-  top: 120px;
+  position: static;
 }
 
 .discipline-number {
@@ -103,10 +109,11 @@
 
 .discipline-heading {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 5vw, 4.25rem);
+  font-size: clamp(1.75rem, 5vw, 4.25rem);
   font-weight: 300;
   color: var(--color-text-primary);
   line-height: 1.05;
+  overflow-wrap: break-word;
 }
 
 .discipline-statement {

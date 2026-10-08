@@ -69,7 +69,29 @@ export const Navbar: React.FC = () => {
           aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
           onClick={() => setIsOpen((prev) => !prev)}
         >
-          {isOpen ? 'Close' : 'Menu'}
+          <span>{isOpen ? 'Close' : 'Menu'}</span>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            {isOpen ? (
+              <>
+                <line x1="3" y1="3" x2="13" y2="13" />
+                <line x1="13" y1="3" x2="3" y2="13" />
+              </>
+            ) : (
+              <>
+                <line x1="2" y1="5" x2="14" y2="5" />
+                <line x1="2" y1="11" x2="14" y2="11" />
+              </>
+            )}
+          </svg>
         </button>
       </div>
 
@@ -97,7 +119,20 @@ export const Navbar: React.FC = () => {
             onClick={() => setIsOpen(false)}
             aria-label="Close navigation menu"
           >
-            Close
+            <span>Close</span>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <line x1="3" y1="3" x2="13" y2="13" />
+              <line x1="13" y1="3" x2="3" y2="13" />
+            </svg>
           </button>
         </div>
 

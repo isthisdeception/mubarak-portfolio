@@ -152,7 +152,7 @@ export const WorkDiscipline: React.FC = () => {
           >
             Explore Other Disciplines
           </span>
-          <div style={{ display: 'flex', gap: 'var(--space-8)' }}>
+          <div className="discipline-nav-items-group">
             {otherDisciplines.map((otherId) => (
               <Link
                 key={otherId}

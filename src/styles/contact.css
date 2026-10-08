@@ -42,11 +42,13 @@
 
 .contact-title {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 7.5vw, 6.5rem);
+  font-size: clamp(2.1rem, 7.5vw, 6.5rem);
   font-weight: 300;
   line-height: 0.98;
   color: var(--color-text-primary);
   margin-bottom: var(--space-4);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .contact-desc {
@@ -62,7 +64,7 @@
 .contact-layout-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(3.5rem, 7vw, 7rem);
+  gap: clamp(2.5rem, 6vw, 7rem);
 }
 
 @media (min-width: 960px) {
@@ -130,6 +132,14 @@
   font-size: var(--text-sm);
   padding: 0.85rem 1.1rem;
   transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+@media (max-width: 768px) {
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 16px;
+  }
 }
 
 .form-input:focus,
@@ -234,6 +244,12 @@
   overflow: hidden;
   background-color: var(--color-surface);
   position: relative;
+}
+
+@media (max-width: 959px) {
+  .sidebar-image-frame {
+    aspect-ratio: 16 / 10;
+  }
 }
 
 .sidebar-image {
