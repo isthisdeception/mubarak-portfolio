@@ -130,7 +130,7 @@ export const Contact: React.FC = () => {
 
                 <p className="success-message">
                   Thank you, <strong>{submittedData.name}</strong>. Your project parameters
-                  have been logged directly with Mubarak’s production desk. We will review
+                  have been logged directly with Prism Pulse’s production desk. We will review
                   scheduling and creative scope, and reply within 24 to 48 hours.
                 </p>
 

@@ -37,7 +37,7 @@ export interface HomeData {
 }
 
 export const homeData: HomeData = {
-  displayName: 'Mubarak',
+  displayName: 'Prism Pulse',
   roleTag: 'PHOTOGRAPHER / DRONE PILOT',
   coordinates: '23.8103° N, 90.4125° E — DHAKA',
   reelTag: 'REEL 35MM / 4K',
@@ -47,7 +47,7 @@ export const homeData: HomeData = {
   heroMedia: {
     type: 'image',
     url: heroMobarakImg,
-    alt: 'Mubarak operating DJI drone outdoors in natural landscape',
+    alt: 'Prism Pulse operating drone outdoors in natural landscape',
     caption: 'Field Journal 08 · Aerial Scout · 2025',
   },
   ctaLabel: 'View Work',

@@ -20,7 +20,7 @@ export interface SiteMetadata {
 }
 
 export const siteData: SiteMetadata = {
-  name: 'Mubarak',
+  name: 'Prism Pulse',
   tagline: 'Photographer · Cinematographer · Drone Operator',
   disciplines: ['Photography', 'Cinematography', 'Drone'],
   location: 'Available Worldwide',
@@ -35,8 +35,8 @@ export const siteData: SiteMetadata = {
     { label: 'Contact', path: '/contact' },
   ],
   socialLinks: [
-    { platform: 'Instagram', url: 'https://instagram.com', handle: '@mubarak.visuals' },
-    { platform: 'Vimeo', url: 'https://vimeo.com', handle: 'mubarakfilms' },
-    { platform: 'YouTube', url: 'https://youtube.com', handle: '@mubarakcinema' },
+    { platform: 'Instagram', url: 'https://instagram.com', handle: '@prismpulse.visuals' },
+    { platform: 'Vimeo', url: 'https://vimeo.com', handle: 'prismpulsefilms' },
+    { platform: 'YouTube', url: 'https://youtube.com', handle: '@prismpulsecinema' },
   ],
 };

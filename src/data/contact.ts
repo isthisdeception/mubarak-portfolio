@@ -27,7 +27,7 @@ export const contactData: ContactData = {
   headline: 'Initiate a Project Dialogue',
   intro:
     'Every production begins with a conversation about light, place, and purpose. Please share the details of your upcoming commission, event, or expedition.',
-  email: 'commissions@mubarak-visuals.com',
+  email: 'commissions@prismpulse-visuals.com',
   phone: '+1 (415) 890-4421',
   representation: 'Direct Artist Representation · Available Worldwide',
   operatingHours: 'Studio Office: Monday – Friday · 09:00 – 18:00 CET',

@@ -40,11 +40,11 @@ export interface AboutData {
 }
 
 export const aboutData: AboutData = {
-  name: 'Mubarak',
+  name: 'Prism Pulse',
   role: 'Photographer · Cinematographer · Drone Operator',
   portrait: {
     src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1600&q=85',
-    alt: 'Studio portrait of Mubarak in warm chiaroscuro ambient light',
+    alt: 'Studio portrait of Prism Pulse visual director in warm chiaroscuro ambient light',
     caption: 'Studio Archive · Portrait by Natural Window Light · 2025',
   },
   intro: {
