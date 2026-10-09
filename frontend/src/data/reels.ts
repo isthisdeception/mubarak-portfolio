@@ -10,7 +10,9 @@ export interface ReelItem {
   title: string;
   category: ReelCategory;
   poster: string;
-  videoSrc: string;
+  videoSrc?: string;
+  youtubeVideoId?: string;
+  embedUrl?: string;
   duration: string;
   aspectRatio: 'vertical' | 'cinematic';
   year: string;
@@ -18,6 +20,7 @@ export interface ReelItem {
   gearOrFormat?: string;
   description: string;
 }
+
 
 export const reelCategories: ReelCategory[] = [
   'Travel',

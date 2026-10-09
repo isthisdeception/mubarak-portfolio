@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { contactData } from '../data/contact';
+import { useSite } from '../context/SiteContext';
+import { contactApi, ApiError } from '../api/client';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 interface FormState {
@@ -16,8 +18,12 @@ interface FormState {
 interface FormErrors {
   name?: string;
   email?: string;
+  phone?: string;
   service?: string;
+  date?: string;
+  location?: string;
   message?: string;
+  general?: string;
 }
 
 const initialFormState: FormState = {
@@ -32,11 +38,29 @@ const initialFormState: FormState = {
 
 export const Contact: React.FC = () => {
   useDocumentTitle('Contact & Project Dialogue');
+  const { contact } = useSite();
   const [formData, setFormData] = useState<FormState>(initialFormState);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [submittedData, setSubmittedData] = useState<FormState | null>(null);
+
+  // Active contact content from API or bundled fallback
+  const activeContact = {
+    meta: contact.meta || contactData.meta,
+    headline: contact.headline || contactData.headline,
+    intro: contact.intro || contactData.intro,
+    email: contact.email || contactData.email,
+    phone: contact.phone || contactData.phone,
+    representation: contact.representation || contactData.representation,
+    operatingHours: contact.operatingHours || contactData.operatingHours,
+    responseNote: contact.responseNote || contactData.responseNote,
+    sideImage: contact.sideImage?.src ? contact.sideImage : contactData.sideImage,
+    serviceOptionGroups:
+      contact.serviceOptionGroups && contact.serviceOptionGroups.length > 0
+        ? contact.serviceOptionGroups
+        : contactData.serviceOptionGroups,
+  };
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
@@ -58,7 +82,7 @@ export const Contact: React.FC = () => {
     if (!formData.message.trim()) {
       newErrors.message = 'Please provide a brief description of your project or dates.';
     } else if (formData.message.trim().length < 10) {
-      newErrors.message = 'Please share at least a short sentence regarding your vision.';
+      newErrors.message = 'Please share at least a short sentence regarding your vision (minimum 10 characters).';
     }
 
     setErrors(newErrors);
@@ -73,11 +97,11 @@ export const Contact: React.FC = () => {
 
     // Clear field-specific error as user types
     if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
+      setErrors((prev) => ({ ...prev, [name]: undefined, general: undefined }));
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validate()) {
@@ -85,14 +109,59 @@ export const Contact: React.FC = () => {
     }
 
     setIsSubmitting(true);
+    setErrors((prev) => ({ ...prev, general: undefined }));
 
-    // Simulate async network submission delay
-    setTimeout(() => {
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || undefined,
+        service: formData.service,
+        date: formData.date || undefined,
+        location: formData.location.trim() || undefined,
+        message: formData.message.trim(),
+      };
+
+      const result = await contactApi.submit(payload);
+
+      if (result.ok) {
+        setIsSubmitted(true);
+        setSubmittedData({ ...formData });
+        setFormData(initialFormState);
+        setErrors({});
+      }
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        err.status === 400 &&
+        typeof err.data === 'object' &&
+        err.data !== null
+      ) {
+        const serverErrors = err.data as Record<string, string[] | string>;
+        const mappedErrors: FormErrors = {};
+
+        for (const [key, val] of Object.entries(serverErrors)) {
+          const message = Array.isArray(val) ? val.join(' ') : String(val);
+          if (key in initialFormState) {
+            mappedErrors[key as keyof FormErrors] = message;
+          } else {
+            mappedErrors.general = mappedErrors.general
+              ? `${mappedErrors.general} ${message}`
+              : message;
+          }
+        }
+        setErrors(mappedErrors);
+      } else {
+        setErrors({
+          general:
+            err instanceof Error
+              ? err.message
+              : 'Transmission failed. Please check your connection and try again.',
+        });
+      }
+    } finally {
       setIsSubmitting(false);
-      setIsSubmitted(true);
-      setSubmittedData({ ...formData });
-      setFormData(initialFormState);
-    }, 850);
+    }
   };
 
   const handleReset = () => {
@@ -106,9 +175,9 @@ export const Contact: React.FC = () => {
       <div className="container">
         {/* Header */}
         <header className="contact-header reveal-slide-up">
-          <span className="contact-meta">{contactData.meta}</span>
-          <h1 className="contact-title">{contactData.headline}</h1>
-          <p className="contact-desc">{contactData.intro}</p>
+          <span className="contact-meta">{activeContact.meta}</span>
+          <h1 className="contact-title">{activeContact.headline}</h1>
+          <p className="contact-desc">{activeContact.intro}</p>
         </header>
 
         {/* Layout Grid: Form on Left, Studio on Right */}
@@ -177,6 +246,14 @@ export const Contact: React.FC = () => {
                 noValidate
                 aria-label="Commission and booking inquiry form"
               >
+                {/* General / Server Error Banner */}
+                {errors.general && (
+                  <div className="contact-error-banner" role="alert">
+                    <span className="contact-error-dot" aria-hidden="true" />
+                    <span>{errors.general}</span>
+                  </div>
+                )}
+
                 {/* Row 1: Name & Email */}
                 <div className="form-group-row">
                   <div className="form-field">
@@ -241,8 +318,15 @@ export const Contact: React.FC = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="+1 (555) 000-0000"
-                      className="form-input"
+                      className={`form-input ${errors.phone ? 'has-error' : ''}`}
+                      aria-invalid={!!errors.phone}
+                      aria-describedby={errors.phone ? 'phone-error' : undefined}
                     />
+                    {errors.phone && (
+                      <span id="phone-error" className="form-error-msg">
+                        {errors.phone}
+                      </span>
+                    )}
                   </div>
 
                   <div className="form-field">
@@ -261,7 +345,7 @@ export const Contact: React.FC = () => {
                       required
                     >
                       <option value="">Select a discipline...</option>
-                      {contactData.serviceOptionGroups.map((group) => (
+                      {activeContact.serviceOptionGroups.map((group) => (
                         <optgroup key={group.discipline} label={`— ${group.discipline} —`}>
                           {group.services.map((svc) => (
                             <option key={svc} value={`${group.discipline}: ${svc}`}>
@@ -294,8 +378,15 @@ export const Contact: React.FC = () => {
                       name="date"
                       value={formData.date}
                       onChange={handleChange}
-                      className="form-input"
+                      className={`form-input ${errors.date ? 'has-error' : ''}`}
+                      aria-invalid={!!errors.date}
+                      aria-describedby={errors.date ? 'date-error' : undefined}
                     />
+                    {errors.date && (
+                      <span id="date-error" className="form-error-msg">
+                        {errors.date}
+                      </span>
+                    )}
                   </div>
 
                   <div className="form-field">
@@ -309,8 +400,15 @@ export const Contact: React.FC = () => {
                       value={formData.location}
                       onChange={handleChange}
                       placeholder="e.g. Lake Como, Italy or Svalbard"
-                      className="form-input"
+                      className={`form-input ${errors.location ? 'has-error' : ''}`}
+                      aria-invalid={!!errors.location}
+                      aria-describedby={errors.location ? 'location-error' : undefined}
                     />
+                    {errors.location && (
+                      <span id="location-error" className="form-error-msg">
+                        {errors.location}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -359,7 +457,7 @@ export const Contact: React.FC = () => {
                     )}
                   </button>
                   <p className="form-privacy-note">
-                    {contactData.responseNote}
+                    {activeContact.responseNote}
                   </p>
                 </div>
               </form>
@@ -370,46 +468,46 @@ export const Contact: React.FC = () => {
           <aside className="contact-sidebar" aria-label="Studio Details">
             <div className="sidebar-image-frame">
               <img
-                src={contactData.sideImage.src}
-                alt={contactData.sideImage.alt}
+                src={activeContact.sideImage.src}
+                alt={activeContact.sideImage.alt}
                 className="sidebar-image"
                 loading="lazy"
               />
             </div>
-            <p className="sidebar-caption">{contactData.sideImage.caption}</p>
+            <p className="sidebar-caption">{activeContact.sideImage.caption}</p>
 
             <div className="sidebar-info-block">
               <div className="sidebar-info-item">
                 <span className="sidebar-info-label">Direct Correspondence</span>
                 <a
-                  href={`mailto:${contactData.email}`}
+                  href={`mailto:${activeContact.email}`}
                   className="sidebar-info-value"
                 >
-                  {contactData.email}
+                  {activeContact.email}
                 </a>
               </div>
 
               <div className="sidebar-info-item">
                 <span className="sidebar-info-label">Studio Line</span>
                 <a
-                  href={`tel:${contactData.phone.replace(/[^0-9+]/g, '')}`}
+                  href={`tel:${activeContact.phone.replace(/[^0-9+]/g, '')}`}
                   className="sidebar-info-value"
                 >
-                  {contactData.phone}
+                  {activeContact.phone}
                 </a>
               </div>
 
               <div className="sidebar-info-item">
                 <span className="sidebar-info-label">Representation</span>
                 <span className="sidebar-info-muted">
-                  {contactData.representation}
+                  {activeContact.representation}
                 </span>
               </div>
 
               <div className="sidebar-info-item">
                 <span className="sidebar-info-label">Studio Hours</span>
                 <span className="sidebar-info-muted">
-                  {contactData.operatingHours}
+                  {activeContact.operatingHours}
                 </span>
               </div>
             </div>

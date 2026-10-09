@@ -106,20 +106,36 @@ export const ReelPlayerModal: React.FC<ReelPlayerModalProps> = ({
             </button>
           )}
 
-          <video
-            ref={videoRef}
-            src={reel.videoSrc}
-            poster={reel.poster}
-            controls
-            playsInline
-            autoPlay
-            className="cinema-video"
-            style={{
-              aspectRatio: reel.aspectRatio === 'vertical' ? '9 / 16' : '16 / 9',
-            }}
-          >
-            Your browser does not support the video tag.
-          </video>
+          {reel.embedUrl ? (
+            <iframe
+              src={`${reel.embedUrl}?autoplay=1&rel=0&modestbranding=1`}
+              title={reel.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="cinema-video"
+              style={{
+                aspectRatio: reel.aspectRatio === 'vertical' ? '9 / 16' : '16 / 9',
+                border: 'none',
+                width: '100%',
+                height: '100%',
+              }}
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              src={reel.videoSrc}
+              poster={reel.poster}
+              controls
+              playsInline
+              autoPlay
+              className="cinema-video"
+              style={{
+                aspectRatio: reel.aspectRatio === 'vertical' ? '9 / 16' : '16 / 9',
+              }}
+            >
+              Your browser does not support the video tag.
+            </video>
+          )}
 
           {reels.length > 1 && (
             <button

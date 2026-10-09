@@ -1120,11 +1120,11 @@ Connect reels, about, services, journal, site chrome (if desired), and contact f
 
 ### Acceptance Criteria
 
-- [ ] All primary routes load API data without console errors.
-- [ ] Contact creates Admin-visible inquiry.
-- [ ] Journal detail + prev/next still sensible (prev/next may be client-side on fetched list or omitted if list order matches API `sort_order` — preserve UX).
-- [ ] `npm run build` passes.
-- [ ] Mocks no longer required for runtime.
+- [x] All primary routes load API data without console errors.
+- [x] Contact creates Admin-visible inquiry.
+- [x] Journal detail + prev/next still sensible (prev/next may be client-side on fetched list or omitted if list order matches API `sort_order` — preserve UX).
+- [x] `npm run build` passes.
+- [x] Mocks no longer required for runtime.
 
 ### Local Verification
 

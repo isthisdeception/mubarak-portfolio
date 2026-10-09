@@ -1,11 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { servicesData } from '../data/services';
+import { servicesData as initialServicesData } from '../data/services';
+import type { ServicesPageData } from '../data/services';
+import { servicesApi } from '../api/client';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export const Services: React.FC = () => {
   useDocumentTitle('Services & Production Commissions');
-  const { meta, headline, intro, groups, engagementModel } = servicesData;
+  const [data, setData] = useState<ServicesPageData>(initialServicesData);
+
+  const loadData = useCallback(async () => {
+    try {
+      const fetched = await servicesApi.getServices();
+      setData(fetched);
+    } catch (err) {
+      console.warn('API unavailable; using bundled services data:', err);
+      // Keep initialServicesData as fallback
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const { meta, headline, intro, groups, engagementModel } = data;
 
   return (
     <div className="services-page reveal-fade">
@@ -21,7 +39,7 @@ export const Services: React.FC = () => {
             Three Major Discipline Service Sections (Split Layout)
             ================================================================== */}
         <div className="services-group-list">
-          {groups.map((group) => (
+          {groups?.map((group) => (
             <section
               key={group.id}
               className="service-discipline-section"
@@ -48,34 +66,34 @@ export const Services: React.FC = () => {
                     <img
                       src={group.heroImage}
                       alt={group.imageAlt}
-                      className="discipline-image"
+                      className="discipline-hero-img"
                       loading="lazy"
                     />
                   </div>
 
-                  <div>
+                  <div style={{ marginTop: 'var(--space-6)' }}>
                     <Link
-                      to={`/work/${group.id}`}
-                      className="btn btn-ghost btn-sm"
-                      style={{ paddingLeft: 0, color: 'var(--color-accent)' }}
+                      to="/contact"
+                      className="btn btn-secondary btn-sm"
+                      style={{ width: 'fit-content' }}
                     >
-                      Explore {group.discipline} Archive Works →
+                      Inquire for {group.discipline} →
                     </Link>
                   </div>
                 </div>
 
-                {/* Right Column: Typographic Services List */}
-                <div className="discipline-services-list">
-                  {group.services.map((service) => (
-                    <article key={service.id} className="service-item-row">
-                      <div className="service-item-header">
-                        <h3 className="service-item-title">{service.name}</h3>
+                {/* Right Column: Tailored Offerings List */}
+                <div className="service-items-col">
+                  {group.services?.map((svc) => (
+                    <article key={svc.id} className="service-card">
+                      <div className="service-card-header">
+                        <h3 className="service-card-name">{svc.name}</h3>
                       </div>
-                      <p className="service-item-desc">{service.description}</p>
-                      {service.deliverables && (
-                        <div className="service-item-deliverable">
-                          <span>Deliverables</span>
-                          <span>— {service.deliverables}</span>
+                      <p className="service-card-desc">{svc.description}</p>
+                      {svc.deliverables && (
+                        <div className="service-deliverables">
+                          <span className="deliverables-label">Deliverables</span>
+                          <span className="deliverables-value">{svc.deliverables}</span>
                         </div>
                       )}
                     </article>
@@ -87,68 +105,32 @@ export const Services: React.FC = () => {
         </div>
 
         {/* ==================================================================
-            Engagement Model (Bespoke Proposals)
+            Bottom: Engagement Model & Terms of Production
             ================================================================== */}
-        <section
-          className="services-engagement-section"
-          aria-label="Commissioning Approach"
-        >
-          <div className="engagement-container">
-            <div>
-              <span className="services-meta" style={{ marginBottom: 'var(--space-2)' }}>
-                Production Protocol
-              </span>
+        {engagementModel && (
+          <section className="engagement-model-section" aria-label="Engagement Model">
+            <div className="engagement-model-card">
+              <span className="engagement-meta">Production Protocols</span>
               <h2 className="engagement-title">{engagementModel.title}</h2>
               <p className="engagement-desc">{engagementModel.description}</p>
+
+              <div className="engagement-notes-grid">
+                {engagementModel.notes?.map((note, idx) => (
+                  <div key={idx} className="engagement-note-item">
+                    <span className="engagement-check" aria-hidden="true">✓</span>
+                    <span>{note}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ marginTop: 'var(--space-8)', textAlign: 'center' }}>
+                <Link to="/contact" className="btn btn-primary btn-md">
+                  Initiate Booking Dialogue →
+                </Link>
+              </div>
             </div>
-
-            <ul className="engagement-notes-list">
-              {engagementModel.notes.map((note, idx) => (
-                <li key={idx} className="engagement-note-item">
-                  <span className="engagement-note-dash" aria-hidden="true">—</span>
-                  <span>{note}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* ==================================================================
-            Bottom CTA Block -> /contact
-            ================================================================== */}
-        <section className="services-bottom-cta" aria-label="Initiate Inquiry">
-          <h2 className="services-bottom-title">
-            Have a project, expedition, or campaign in development?
-          </h2>
-          <p
-            style={{
-              fontFamily: 'var(--font-sans)',
-              color: 'var(--color-text-secondary)',
-              fontSize: 'var(--text-sm)',
-              maxWidth: '540px',
-              lineHeight: 'var(--leading-relaxed)',
-            }}
-          >
-            Direct consultations are scheduled without obligation. Tell us about your vision,
-            locations, and anticipated timeline.
-          </p>
-
-          <div
-            style={{
-              display: 'flex',
-              gap: 'var(--space-4)',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-            }}
-          >
-            <Link to="/contact" className="btn btn-primary btn-md">
-              Start a Project Dialogue →
-            </Link>
-            <Link to="/work" className="btn btn-secondary btn-md">
-              Review Archive
-            </Link>
-          </div>
-        </section>
+          </section>
+        )}
       </div>
     </div>
   );

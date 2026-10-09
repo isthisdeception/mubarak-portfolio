@@ -1,18 +1,20 @@
 import React from 'react';
-import { siteData } from '../data/site';
+import { useSite } from '../context/SiteContext';
 
 export const Footer: React.FC = () => {
+  const { site } = useSite();
+
   return (
     <footer className="site-footer" role="contentinfo">
       <div className="container">
         <div className="footer-top">
           <div className="footer-brand-col">
-            <p className="footer-name">{siteData.name}</p>
-            <p className="footer-tagline">{siteData.tagline}</p>
+            <p className="footer-name">{site.name}</p>
+            <p className="footer-tagline">{site.tagline}</p>
           </div>
 
           <div className="footer-social-col">
-            {siteData.socialLinks.map((soc) => (
+            {site.socialLinks.map((soc) => (
               <a
                 key={soc.platform}
                 href={soc.url}
@@ -29,8 +31,8 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="footer-bottom">
-          <p>© {siteData.copyrightYear} {siteData.name}. All visual works reserved.</p>
-          <p className="footer-worldwide">{siteData.location}</p>
+          <p>© {site.copyrightYear} {site.name}. All visual works reserved.</p>
+          <p className="footer-worldwide">{site.location}</p>
         </div>
       </div>
     </footer>

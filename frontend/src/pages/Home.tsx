@@ -1,34 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { homeData } from '../data/home';
-import type { SelectedWorkItem } from '../data/home';
+import type { HomeData } from '../data/home';
 import { portfolioApi } from '../api/client';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export const Home: React.FC = () => {
   useDocumentTitle();
-  const { heroMedia, selectedWorksSection } = homeData;
-  const [selectedWorks, setSelectedWorks] = useState<SelectedWorkItem[]>(homeData.selectedWorks);
+  const [data, setData] = useState<HomeData>(homeData);
 
   useEffect(() => {
     portfolioApi
       .getHome()
-      .then((data) => {
-        if (data.selectedWorks && data.selectedWorks.length > 0) {
-          setSelectedWorks(data.selectedWorks);
-        }
+      .then((serverData: HomeData) => {
+        setData((prev: HomeData) => ({
+          ...prev,
+          ...serverData,
+          selectedWorks:
+            serverData.selectedWorks && serverData.selectedWorks.length > 0
+              ? serverData.selectedWorks
+              : prev.selectedWorks,
+        }));
       })
       .catch((err) => {
         console.warn('API unavailable; using bundled selected works fallback:', err);
       });
   }, []);
 
+  const { heroMedia, selectedWorksSection, selectedWorks } = data;
+
   // Split selected works for asymmetric editorial presentation
   const featuredFirst = selectedWorks[0];
   const pairItems = [selectedWorks[1], selectedWorks[2]];
   const wideItem = selectedWorks[3];
   const singleItem = selectedWorks[4];
-
 
   return (
     <div className="home-page reveal-fade">
@@ -51,26 +56,26 @@ export const Home: React.FC = () => {
         <div className="container hero-cinematic-content">
           {/* Top Row: Coordinates on Left, Reel Tag on Right */}
           <div className="hero-top-row reveal-fade">
-            <span className="hero-coordinates">{homeData.coordinates}</span>
+            <span className="hero-coordinates">{data.coordinates}</span>
             <Link to="/reels" className="hero-reel-badge" aria-label="Explore Reels">
               <span className="hero-reel-dot" aria-hidden="true" />
-              <span>{homeData.reelTag}</span>
+              <span>{data.reelTag}</span>
             </Link>
           </div>
 
           {/* Bottom Row: Identity on Left, View Work on Right */}
           <div className="hero-bottom-row reveal-slide-up">
             <div className="hero-title-group">
-              <span className="hero-role-tag">{homeData.roleTag}</span>
-              <h1 className="hero-main-name">{homeData.displayName}</h1>
+              <span className="hero-role-tag">{data.roleTag}</span>
+              <h1 className="hero-main-name">{data.displayName}</h1>
             </div>
 
             <div className="hero-view-work-group">
-              <Link to={homeData.ctaTarget} className="hero-view-work-link">
-                <span>{homeData.ctaLabel}</span>
+              <Link to={data.ctaTarget} className="hero-view-work-link">
+                <span>{data.ctaLabel}</span>
                 <span aria-hidden="true">→</span>
               </Link>
-              <span className="hero-portfolio-sub">{homeData.ctaSubLabel}</span>
+              <span className="hero-portfolio-sub">{data.ctaSubLabel}</span>
             </div>
           </div>
         </div>

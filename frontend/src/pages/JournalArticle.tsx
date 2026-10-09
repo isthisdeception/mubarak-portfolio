@@ -1,27 +1,96 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { journalPosts } from '../data/journal';
+import type { JournalPost } from '../data/journal';
+import { journalApi } from '../api/client';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export const JournalArticle: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
 
-  const currentPostIndex = useMemo(() => {
-    return journalPosts.findIndex((p) => p.slug === slug);
+  const [post, setPost] = useState<JournalPost | null>(null);
+  const [allPosts, setAllPosts] = useState<JournalPost[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isNotFound, setIsNotFound] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useDocumentTitle(post ? post.title : isNotFound ? 'Entry Not Found' : 'Journal');
+
+  const loadArticle = useCallback(async () => {
+    if (!slug) return;
+    setIsLoading(true);
+    setError(null);
+    setIsNotFound(false);
+    try {
+      const [articleData, listData] = await Promise.all([
+        journalApi.getItemBySlug(slug),
+        journalApi.getItems(),
+      ]);
+      setPost(articleData);
+      setAllPosts(listData);
+    } catch (err: unknown) {
+      const apiErr = err as { status?: number };
+      if (apiErr?.status === 404) {
+        setIsNotFound(true);
+      } else {
+        console.error('Failed to load article:', err);
+        setError('Unable to load article content from the server. Please verify your connection.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }, [slug]);
 
-  const post = currentPostIndex !== -1 ? journalPosts[currentPostIndex] : null;
-
-  useDocumentTitle(post ? post.title : 'Entry Not Found');
+  useEffect(() => {
+    loadArticle();
+  }, [loadArticle]);
 
   // Previous & Next posts for footer navigation
-  const prevPost = currentPostIndex > 0 ? journalPosts[currentPostIndex - 1] : null;
-  const nextPost =
-    currentPostIndex !== -1 && currentPostIndex < journalPosts.length - 1
-      ? journalPosts[currentPostIndex + 1]
-      : null;
+  const { prevPost, nextPost } = useMemo(() => {
+    const currentIndex = allPosts.findIndex((p) => p.slug === slug);
+    return {
+      prevPost: currentIndex > 0 ? allPosts[currentIndex - 1] : null,
+      nextPost:
+        currentIndex !== -1 && currentIndex < allPosts.length - 1
+          ? allPosts[currentIndex + 1]
+          : null,
+    };
+  }, [allPosts, slug]);
 
-  if (!post) {
+  // Loading State
+  if (isLoading) {
+    return (
+      <div className="container" style={{ paddingBlock: 'var(--space-24)', textAlign: 'center' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-accent)',
+            fontSize: 'var(--text-sm)',
+            letterSpacing: 'var(--tracking-widest)',
+            textTransform: 'uppercase',
+            color: 'var(--color-text-muted)',
+          }}
+        >
+          Retrieving journal entry...
+        </p>
+      </div>
+    );
+  }
+
+  // Error State
+  if (error) {
+    return (
+      <div className="container" style={{ paddingBlock: 'var(--space-24)', textAlign: 'center' }}>
+        <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--space-4)' }}>
+          {error}
+        </p>
+        <button type="button" className="filter-btn active" onClick={loadArticle}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  // 404 Not Found State
+  if (isNotFound || !post) {
     return (
       <div className="container page-placeholder">
         <div className="page-placeholder-inner">
@@ -95,88 +164,52 @@ export const JournalArticle: React.FC = () => {
             </blockquote>
           )}
 
-          {content.bodyParagraphs.map((para, idx) => (
+          {content.bodyParagraphs?.map((para, idx) => (
             <p key={idx} className="article-body-p">
               {para}
             </p>
           ))}
 
+          {/* Technical Note Accent Callout */}
           {content.technicalNote && (
-            <aside className="article-technical-box" aria-label="Technical note">
-              <span className="technical-box-header">Field Optics & Exposure</span>
-              <p className="technical-box-text">{content.technicalNote}</p>
-            </aside>
+            <div className="article-tech-note">
+              <span className="article-tech-label">Technical Observation</span>
+              <p className="article-tech-text">{content.technicalNote}</p>
+            </div>
           )}
 
+          {/* Philosophical Takeaway Footer */}
           {content.takeaway && (
-            <div
-              style={{
-                marginTop: 'var(--space-4)',
-                paddingTop: 'var(--space-6)',
-                borderTop: '1px solid var(--color-border-subtle)',
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: 'var(--font-accent)',
-                  fontSize: '0.7rem',
-                  letterSpacing: 'var(--tracking-widest)',
-                  textTransform: 'uppercase',
-                  color: 'var(--color-accent)',
-                }}
-              >
-                Core Observation
-              </span>
-              <p
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1.35rem',
-                  color: 'var(--color-text-primary)',
-                  marginTop: 'var(--space-2)',
-                  fontStyle: 'italic',
-                }}
-              >
-                {content.takeaway}
-              </p>
+            <div className="article-takeaway">
+              <span className="article-takeaway-label">Field Reflection</span>
+              <p className="article-takeaway-text">{content.takeaway}</p>
             </div>
           )}
         </div>
 
-        {/* Footer Article Navigation */}
-        <nav className="article-footer-nav" aria-label="Adjacent articles">
-          <div>
-            {prevPost ? (
-              <Link
-                to={`/journal/${prevPost.slug}`}
-                style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '4px' }}
-              >
-                <span style={{ fontFamily: 'var(--font-accent)', fontSize: '0.68rem', letterSpacing: 'var(--tracking-widest)', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>
-                  ← Previous Entry
-                </span>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--color-text-primary)' }}>
-                  {prevPost.title}
-                </span>
-              </Link>
-            ) : (
-              <div />
-            )}
-          </div>
+        {/* Previous / Next Entry Navigation Bar */}
+        <nav className="article-footer-nav" aria-label="Adjacent journal entries">
+          {prevPost ? (
+            <Link
+              to={`/journal/${prevPost.slug}`}
+              className="article-nav-card article-nav-prev"
+            >
+              <span className="article-nav-direction">← Previous Entry</span>
+              <span className="article-nav-title">{prevPost.title}</span>
+            </Link>
+          ) : (
+            <div />
+          )}
 
-          <div>
-            {nextPost && (
-              <Link
-                to={`/journal/${nextPost.slug}`}
-                style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'right' }}
-              >
-                <span style={{ fontFamily: 'var(--font-accent)', fontSize: '0.68rem', letterSpacing: 'var(--tracking-widest)', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>
-                  Next Entry →
-                </span>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--color-text-primary)' }}>
-                  {nextPost.title}
-                </span>
-              </Link>
-            )}
-          </div>
+          {nextPost && (
+            <Link
+              to={`/journal/${nextPost.slug}`}
+              className="article-nav-card article-nav-next"
+            >
+              <span className="article-nav-direction">Next Entry →</span>
+              <span className="article-nav-title">{nextPost.title}</span>
+            </Link>
+          )}
         </nav>
       </div>
     </article>

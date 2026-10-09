@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { siteData } from '../data/site';
+import { useSite } from '../context/SiteContext';
 
 export const Navbar: React.FC = () => {
+  const { site } = useSite();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
@@ -53,9 +54,9 @@ export const Navbar: React.FC = () => {
             to="/"
             className="site-brand"
             onClick={() => setIsOpen(false)}
-            aria-label={`${siteData.name} - Home`}
+            aria-label={`${site.name} - Home`}
           >
-            <span className="brand-name">{siteData.name}</span>
+            <span className="brand-name">{site.name}</span>
             <span className="brand-sub">Visuals</span>
           </Link>
           <button
@@ -82,7 +83,7 @@ export const Navbar: React.FC = () => {
         </div>
 
         <nav className="mobile-nav-body" aria-label="Mobile navigation links">
-          {siteData.navItems.map((item, idx) => (
+          {site.navItems.map((item, idx) => (
             <NavLink
               key={item.path}
               to={item.path}
@@ -102,10 +103,10 @@ export const Navbar: React.FC = () => {
         <div className="mobile-nav-footer">
           <div className="availability-pill">
             <span className="availability-dot" aria-hidden="true" />
-            <span>{siteData.location}</span>
+            <span>{site.location}</span>
           </div>
           <div className="mobile-socials">
-            {siteData.socialLinks.map((soc) => (
+            {site.socialLinks.map((soc) => (
               <a
                 key={soc.platform}
                 href={soc.url}
@@ -126,14 +127,14 @@ export const Navbar: React.FC = () => {
       <header className="site-header" role="banner">
         <div className="container header-container">
           {/* Brand */}
-          <Link to="/" className="site-brand" aria-label={`${siteData.name} - Home`}>
-            <span className="brand-name">{siteData.name}</span>
+          <Link to="/" className="site-brand" aria-label={`${site.name} - Home`}>
+            <span className="brand-name">{site.name}</span>
             <span className="brand-sub">Visuals</span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="desktop-nav" aria-label="Main Navigation">
-            {siteData.navItems.map((item) => (
+            {site.navItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
@@ -151,7 +152,7 @@ export const Navbar: React.FC = () => {
           <div className="header-actions">
             <div className="availability-pill" title="Current Booking Status">
               <span className="availability-dot" aria-hidden="true" />
-              <span>{siteData.location}</span>
+              <span>{site.location}</span>
             </div>
           </div>
 
