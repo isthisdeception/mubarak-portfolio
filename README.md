@@ -1,32 +1,66 @@
-# React + TypeScript + Vite
+# Prism Pulse — Visual Portfolio & Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Prism Pulse is the personal portfolio and digital platform for Mobarak — Photographer, Cinematographer, and Drone Operator. It showcases visual stories told with cinematic clarity across still imagery, motion reels, journal writings, and production service offerings.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Repository Structure
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```text
+mubarak-portfolio/
+├── frontend/             # React 19 + TypeScript + Vite SPA
+│   ├── src/              # Application source code
+│   ├── public/           # Static assets, icons, redirects
+│   ├── index.html        # HTML entry point
+│   ├── package.json      # Frontend dependencies & scripts
+│   ├── vite.config.ts    # Vite bundler configuration
+│   ├── vercel.json       # SPA client-side routing rewrites
+│   └── tsconfig*.json    # TypeScript configurations
+├── backend/              # Django + Django REST Framework API (Steps 02–06)
+│   └── .gitkeep          # Scaffold placeholder
+├── execution/            # Project execution documentation
+│   └── execution.md      # Audited 10-step implementation plan
+├── .gitignore            # Git ignore rules for Node, Python, and secrets
+└── README.md             # Project overview and run guides
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+---
+
+## Getting Started (Frontend)
+
+To run the React frontend locally:
+
+```bash
+# Navigate to the frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start the Vite development server
+npm run dev
+```
+
+### Other Frontend Scripts
+
+- **Typecheck & Build:** `npm run build`
+- **Lint:** `npm run lint`
+- **Preview Production Build:** `npm run preview`
+
+---
+
+## Backend (Coming in Step 02+)
+
+The Django backend API and PostgreSQL database are introduced starting in Step 02 under the `backend/` directory.
+
+---
+
+## Deployment Note (Vercel)
+
+For existing or new Vercel deployments of the frontend:
+1. Open your project settings on the **Vercel Dashboard**.
+2. Under **General > Root Directory**, click **Edit** and set it to:
+   ```
+   frontend
+   ```
+3. Save settings. Vercel will automatically detect the Vite preset and run `npm run build` from `frontend/`.
