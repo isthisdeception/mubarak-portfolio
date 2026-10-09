@@ -213,3 +213,193 @@ class AdminIntegrationTests(TestCase):
         resp = self.client.post(add_url, data=post_data, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(PortfolioItem.objects.filter(slug='admin-test-item').exists())
+
+
+class PublicAPITests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command('seed_content')
+
+    def test_disciplines_endpoint(self):
+        resp = self.client.get('/api/disciplines/')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIsInstance(data, list)
+        self.assertGreaterEqual(len(data), 3)
+        item = data[0]
+        expected_keys = {'id', 'name', 'tagline', 'description', 'heroImage', 'categories'}
+        self.assertTrue(expected_keys.issubset(item.keys()))
+        self.assertIsInstance(item['categories'], list)
+        self.assertGreater(len(item['categories']), 0)
+
+    def test_portfolio_list_and_filters(self):
+        resp = self.client.get('/api/portfolio/')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(len(data), 14)
+        item = data[0]
+        expected_keys = {
+            'id', 'title', 'discipline', 'category', 'mediaType',
+            'src', 'alt', 'aspectRatio', 'year', 'location',
+            'clientOrContext', 'description'
+        }
+        self.assertTrue(expected_keys.issubset(item.keys()))
+
+        # Filter by discipline
+        resp_photo = self.client.get('/api/portfolio/?discipline=photography')
+        self.assertEqual(resp_photo.status_code, 200)
+        data_photo = resp_photo.json()
+        self.assertTrue(all(i['discipline'] == 'photography' for i in data_photo))
+
+        # Filter by category
+        resp_cat = self.client.get('/api/portfolio/?category=Portrait')
+        self.assertEqual(resp_cat.status_code, 200)
+        data_cat = resp_cat.json()
+        self.assertTrue(all(i['category'] == 'Portrait' for i in data_cat))
+
+        # Filter by featured
+        resp_featured = self.client.get('/api/portfolio/?featured=true')
+        self.assertEqual(resp_featured.status_code, 200)
+        data_featured = resp_featured.json()
+        self.assertEqual(len(data_featured), 5)
+
+    def test_portfolio_detail_and_unpublished(self):
+        resp = self.client.get('/api/portfolio/solitude-in-svalbard/')
+        self.assertEqual(resp.status_code, 200)
+        item = resp.json()
+        self.assertEqual(item['id'], 'solitude-in-svalbard')
+
+        # Nonexistent returns 404
+        resp_404 = self.client.get('/api/portfolio/nonexistent-item-slug/')
+        self.assertEqual(resp_404.status_code, 404)
+
+        # Unpublished item returns 404
+        p = PortfolioItem.objects.get(slug='solitude-in-svalbard')
+        p.is_published = False
+        p.save()
+        resp_unpub = self.client.get('/api/portfolio/solitude-in-svalbard/')
+        self.assertEqual(resp_unpub.status_code, 404)
+
+        # Unpublished excluded from list
+        resp_list = self.client.get('/api/portfolio/')
+        slugs = [x['id'] for x in resp_list.json()]
+        self.assertNotIn('solitude-in-svalbard', slugs)
+
+    def test_reels_endpoint_and_detail(self):
+        resp = self.client.get('/api/reels/')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(len(data), 10)
+        item = data[0]
+        expected_keys = {
+            'id', 'title', 'category', 'poster', 'videoSrc',
+            'youtubeVideoId', 'embedUrl', 'duration', 'aspectRatio',
+            'year', 'location', 'gearOrFormat', 'description'
+        }
+        self.assertTrue(expected_keys.issubset(item.keys()))
+        if item['youtubeVideoId']:
+            self.assertIn('https://www.youtube-nocookie.com/embed/', item['embedUrl'])
+
+        # Filter by category
+        resp_travel = self.client.get('/api/reels/?category=Travel')
+        self.assertEqual(resp_travel.status_code, 200)
+        self.assertTrue(all(r['category'] == 'Travel' for r in resp_travel.json()))
+
+        # Detail
+        first_slug = item['id']
+        resp_detail = self.client.get(f'/api/reels/{first_slug}/')
+        self.assertEqual(resp_detail.status_code, 200)
+        self.assertEqual(resp_detail.json()['id'], first_slug)
+
+        # 404
+        self.assertEqual(self.client.get('/api/reels/unknown-reel/').status_code, 404)
+
+    def test_journal_list_and_detail(self):
+        resp = self.client.get('/api/journal/')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(len(data), 6)
+        item = data[0]
+        list_keys = {'slug', 'title', 'category', 'date', 'readTime', 'excerpt', 'coverImage', 'coverAlt', 'location'}
+        self.assertTrue(list_keys.issubset(item.keys()))
+        # List should NOT contain full content body
+        self.assertNotIn('content', item)
+
+        # Detail
+        slug = item['slug']
+        resp_detail = self.client.get(f'/api/journal/{slug}/')
+        self.assertEqual(resp_detail.status_code, 200)
+        detail_data = resp_detail.json()
+        self.assertIn('content', detail_data)
+        self.assertIn('introParagraph', detail_data['content'])
+        self.assertIn('bodyParagraphs', detail_data['content'])
+        self.assertIsInstance(detail_data['content']['bodyParagraphs'], list)
+
+        # 404
+        self.assertEqual(self.client.get('/api/journal/unknown-post/').status_code, 404)
+
+    def test_services_endpoint(self):
+        resp = self.client.get('/api/services/')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn('meta', data)
+        self.assertIn('headline', data)
+        self.assertIn('intro', data)
+        self.assertIn('engagementModel', data)
+        self.assertIn('groups', data)
+        self.assertGreaterEqual(len(data['groups']), 3)
+        grp = data['groups'][0]
+        self.assertIn('services', grp)
+        self.assertGreater(len(grp['services']), 0)
+        svc = grp['services'][0]
+        self.assertIn('id', svc)
+        self.assertIn('name', svc)
+        self.assertIn('description', svc)
+
+    def test_about_endpoint(self):
+        resp = self.client.get('/api/about/')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        expected_keys = {
+            'name', 'role', 'portrait', 'intro', 'philosophy',
+            'skills', 'equipment', 'professionalNotes'
+        }
+        self.assertTrue(expected_keys.issubset(data.keys()))
+        self.assertEqual(data['name'], 'Prism Pulse')
+        self.assertIn('src', data['portrait'])
+        self.assertIn('paragraphs', data['intro'])
+        self.assertIn('tenets', data['philosophy'])
+        self.assertIn('list', data['skills'])
+        self.assertIn('categories', data['equipment'])
+
+    def test_site_endpoint(self):
+        resp = self.client.get('/api/site/')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        expected_keys = {
+            'name', 'tagline', 'disciplines', 'location',
+            'copyrightYear', 'navItems', 'socialLinks',
+            'contactEmail', 'contactPhone', 'email', 'phone',
+            'representation', 'operatingHours', 'responseNote', 'sideImage'
+        }
+        self.assertTrue(expected_keys.issubset(data.keys()))
+        self.assertEqual(len(data['navItems']), 7)
+        self.assertGreaterEqual(len(data['socialLinks']), 3)
+
+    def test_home_endpoint(self):
+        resp = self.client.get('/api/home/')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        expected_keys = {
+            'displayName', 'roleTag', 'coordinates', 'reelTag',
+            'heroHeadline', 'heroIntro', 'heroMedia', 'ctaLabel',
+            'selectedWorks'
+        }
+        self.assertTrue(expected_keys.issubset(data.keys()))
+        self.assertEqual(len(data['selectedWorks']), 5)
+        sw = data['selectedWorks'][0]
+        self.assertIn('linkTarget', sw)
+        self.assertTrue(sw['linkTarget'].startswith('/work/'))
+        self.assertIn('?item=', sw['linkTarget'])
+        for item in data['selectedWorks']:
+            self.assertIn(item['discipline'], {'Photography', 'Cinematography', 'Drone'})
