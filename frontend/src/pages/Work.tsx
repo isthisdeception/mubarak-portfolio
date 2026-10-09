@@ -1,13 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import {
-  portfolioItems,
-  disciplinesData,
-} from '../data/portfolio';
-import type {
-  DisciplineId,
-  PortfolioItem,
-} from '../data/portfolio';
+import { disciplinesData } from '../data/portfolio';
+import type { DisciplineId, DisciplineMeta, PortfolioItem } from '../data/portfolio';
+import { portfolioApi } from '../api/client';
 import { PortfolioItemCard } from '../components/portfolio/PortfolioItemCard';
 import { CategoryFilter } from '../components/portfolio/CategoryFilter';
 import { Lightbox } from '../components/portfolio/Lightbox';
@@ -19,12 +14,50 @@ export const Work: React.FC = () => {
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
+  // API State
+  const [items, setItems] = useState<PortfolioItem[]>([]);
+  const [disciplinesMap, setDisciplinesMap] =
+    useState<Record<DisciplineId, DisciplineMeta>>(disciplinesData);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [fetchedDisciplines, fetchedItems] = await Promise.all([
+        portfolioApi.getDisciplines(),
+        portfolioApi.getItems(),
+      ]);
+
+      const map = { ...disciplinesData };
+      for (const disc of fetchedDisciplines) {
+        if (disc.id in map) {
+          map[disc.id as DisciplineId] = disc;
+        }
+      }
+      setDisciplinesMap(map);
+      setItems(fetchedItems);
+    } catch (err) {
+      console.error('Failed to load portfolio archive:', err);
+      setError(
+        'Unable to load the visual archive from the server. Please ensure the backend is running and try again.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   // Derive active lightbox item directly from URL query param
   const activeItemId = searchParams.get('item');
   const activeLightboxItem = useMemo(() => {
     if (!activeItemId) return null;
-    return portfolioItems.find((item) => item.id === activeItemId) || null;
-  }, [activeItemId]);
+    return items.find((item) => item.id === activeItemId) || null;
+  }, [activeItemId, items]);
 
   const handleOpenLightbox = (item: PortfolioItem) => {
     const next = new URLSearchParams(searchParams);
@@ -46,28 +79,32 @@ export const Work: React.FC = () => {
 
   // Filter items
   const filteredItems = useMemo(() => {
-    return portfolioItems.filter((item) => {
+    return items.filter((item) => {
       const matchDiscipline =
         selectedDiscipline === 'all' || item.discipline === selectedDiscipline;
       const matchCategory =
         selectedCategory === 'all' || item.category === selectedCategory;
       return matchDiscipline && matchCategory;
     });
-  }, [selectedDiscipline, selectedCategory]);
+  }, [items, selectedDiscipline, selectedCategory]);
 
   // Extract available categories based on selected discipline
   const availableCategories = useMemo(() => {
     if (selectedDiscipline === 'all') {
-      return Array.from(new Set(portfolioItems.map((i) => i.category)));
+      return Array.from(new Set(items.map((i) => i.category)));
     }
-    const meta = disciplinesData[selectedDiscipline as DisciplineId];
+    const meta = disciplinesMap[selectedDiscipline as DisciplineId];
     return meta ? meta.categories : [];
-  }, [selectedDiscipline]);
+  }, [items, disciplinesMap, selectedDiscipline]);
 
   const handleSelectDiscipline = (disc: string) => {
     setSelectedDiscipline(disc);
     setSelectedCategory('all');
   };
+
+  const photoCount = items.filter((i) => i.discipline === 'photography').length;
+  const cineCount = items.filter((i) => i.discipline === 'cinematography').length;
+  const droneCount = items.filter((i) => i.discipline === 'drone').length;
 
   return (
     <div className="work-page reveal-fade">
@@ -95,14 +132,14 @@ export const Work: React.FC = () => {
             <div className="chapter-info">
               <span className="chapter-number">Chapter 01 · Stillness</span>
               <h2 className="chapter-name">Photography</h2>
-              <p className="chapter-tagline">{disciplinesData.photography.description}</p>
+              <p className="chapter-tagline">{disciplinesMap.photography.description}</p>
               <span className="chapter-action">
-                Enter Photography Archive ({portfolioItems.filter((i) => i.discipline === 'photography').length} Works) →
+                Enter Photography Archive ({photoCount} Works) →
               </span>
             </div>
             <div className="chapter-media">
               <img
-                src={disciplinesData.photography.heroImage}
+                src={disciplinesMap.photography.heroImage}
                 alt="Photography Chapter"
                 className="chapter-img"
                 loading="eager"
@@ -119,14 +156,14 @@ export const Work: React.FC = () => {
             <div className="chapter-info">
               <span className="chapter-number">Chapter 02 · Motion</span>
               <h2 className="chapter-name">Cinematography</h2>
-              <p className="chapter-tagline">{disciplinesData.cinematography.description}</p>
+              <p className="chapter-tagline">{disciplinesMap.cinematography.description}</p>
               <span className="chapter-action">
-                Enter Cinematography Archive ({portfolioItems.filter((i) => i.discipline === 'cinematography').length} Works) →
+                Enter Cinematography Archive ({cineCount} Works) →
               </span>
             </div>
             <div className="chapter-media">
               <img
-                src={disciplinesData.cinematography.heroImage}
+                src={disciplinesMap.cinematography.heroImage}
                 alt="Cinematography Chapter"
                 className="chapter-img"
                 loading="lazy"
@@ -143,14 +180,14 @@ export const Work: React.FC = () => {
             <div className="chapter-info">
               <span className="chapter-number">Chapter 03 · Elevation</span>
               <h2 className="chapter-name">Drone Operations</h2>
-              <p className="chapter-tagline">{disciplinesData.drone.description}</p>
+              <p className="chapter-tagline">{disciplinesMap.drone.description}</p>
               <span className="chapter-action">
-                Enter Aerial Archive ({portfolioItems.filter((i) => i.discipline === 'drone').length} Works) →
+                Enter Aerial Archive ({droneCount} Works) →
               </span>
             </div>
             <div className="chapter-media">
               <img
-                src={disciplinesData.drone.heroImage}
+                src={disciplinesMap.drone.heroImage}
                 alt="Drone Chapter"
                 className="chapter-img"
                 loading="lazy"
@@ -180,7 +217,7 @@ export const Work: React.FC = () => {
                 onClick={() => handleSelectDiscipline('all')}
               >
                 <span>All Disciplines</span>
-                <span className="filter-count">({portfolioItems.length})</span>
+                <span className="filter-count">({items.length})</span>
               </button>
               <button
                 type="button"
@@ -188,9 +225,7 @@ export const Work: React.FC = () => {
                 onClick={() => handleSelectDiscipline('photography')}
               >
                 <span>Photography</span>
-                <span className="filter-count">
-                  ({portfolioItems.filter((i) => i.discipline === 'photography').length})
-                </span>
+                <span className="filter-count">({photoCount})</span>
               </button>
               <button
                 type="button"
@@ -198,9 +233,7 @@ export const Work: React.FC = () => {
                 onClick={() => handleSelectDiscipline('cinematography')}
               >
                 <span>Cinematography</span>
-                <span className="filter-count">
-                  ({portfolioItems.filter((i) => i.discipline === 'cinematography').length})
-                </span>
+                <span className="filter-count">({cineCount})</span>
               </button>
               <button
                 type="button"
@@ -208,9 +241,7 @@ export const Work: React.FC = () => {
                 onClick={() => handleSelectDiscipline('drone')}
               >
                 <span>Drone</span>
-                <span className="filter-count">
-                  ({portfolioItems.filter((i) => i.discipline === 'drone').length})
-                </span>
+                <span className="filter-count">({droneCount})</span>
               </button>
             </div>
 
@@ -221,24 +252,75 @@ export const Work: React.FC = () => {
               onSelectCategory={setSelectedCategory}
               totalCount={
                 selectedDiscipline === 'all'
-                  ? portfolioItems.length
-                  : portfolioItems.filter((i) => i.discipline === selectedDiscipline).length
+                  ? items.length
+                  : items.filter((i) => i.discipline === selectedDiscipline).length
               }
             />
           </div>
 
-          {/* Spacious Gallery Grid */}
-          <div className="portfolio-grid">
-            {filteredItems.map((item) => (
-              <PortfolioItemCard
-                key={item.id}
-                item={item}
-                onClick={handleOpenLightbox}
-              />
-            ))}
-          </div>
+          {/* Loading State */}
+          {isLoading && (
+            <div
+              style={{
+                paddingBlock: 'var(--space-16)',
+                textAlign: 'center',
+                fontFamily: 'var(--font-accent)',
+                letterSpacing: 'var(--tracking-widest)',
+                color: 'var(--color-text-muted)',
+                fontSize: 'var(--text-sm)',
+                textTransform: 'uppercase',
+              }}
+            >
+              Loading curated works...
+            </div>
+          )}
 
-          {filteredItems.length === 0 && (
+          {/* Error State */}
+          {!isLoading && error && (
+            <div
+              role="alert"
+              style={{
+                paddingBlock: 'var(--space-16)',
+                textAlign: 'center',
+                maxWidth: '540px',
+                marginInline: 'auto',
+              }}
+            >
+              <p
+                style={{
+                  color: 'var(--color-text-muted)',
+                  fontSize: 'var(--text-sm)',
+                  marginBottom: 'var(--space-6)',
+                  lineHeight: 'var(--leading-relaxed)',
+                }}
+              >
+                {error}
+              </p>
+              <button
+                type="button"
+                className="filter-btn active"
+                onClick={loadData}
+                style={{ marginInline: 'auto' }}
+              >
+                Retry Connection
+              </button>
+            </div>
+          )}
+
+          {/* Spacious Gallery Grid */}
+          {!isLoading && !error && (
+            <div className="portfolio-grid">
+              {filteredItems.map((item) => (
+                <PortfolioItemCard
+                  key={item.id}
+                  item={item}
+                  onClick={handleOpenLightbox}
+                />
+              ))}
+            </div>
+          )}
+
+          {!isLoading && !error && filteredItems.length === 0 && (
             <div style={{ paddingBlock: 'var(--space-16)', textAlign: 'center' }}>
               <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
                 No works found in this selection.

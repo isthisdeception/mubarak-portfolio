@@ -13,6 +13,12 @@ youtube_id_validator = RegexValidator(
 )
 
 
+def validate_https_url(value: str):
+    """Ensure media/image URLs strictly use secure HTTPS protocol."""
+    if value and not value.startswith('https://'):
+        raise ValidationError('URL must use the secure HTTPS protocol (e.g. https://...).')
+
+
 def extract_youtube_id(value: str) -> str:
     """Extract YouTube 11-char ID from raw ID or common YouTube URL formats."""
     if not value:
@@ -20,11 +26,12 @@ def extract_youtube_id(value: str) -> str:
     value = value.strip()
     if re.match(r'^[A-Za-z0-9_-]{11}$', value):
         return value
-    # Patterns like https://www.youtube.com/watch?v=XXXXXXXXXXX or youtu.be/XXXXXXXXXXX
+    # Patterns like https://www.youtube.com/watch?v=XXXXXXXXXXX, youtu.be/XXXXXXXXXXX, /embed/XXXXXXXXXXX, or /shorts/XXXXXXXXXXX
     match = re.search(r'(?:v=|\/embed\/|youtu\.be\/|\/v\/|\/shorts\/)([A-Za-z0-9_-]{11})', value)
     if match:
         return match.group(1)
     return value
+
 
 
 # ------------------------------------------------------------------------------
@@ -39,7 +46,7 @@ class Discipline(models.Model):
     name = models.CharField(max_length=100)
     tagline = models.CharField(max_length=255)
     description = models.TextField()
-    hero_image_url = models.URLField(max_length=500)
+    hero_image_url = models.URLField(max_length=500, validators=[validate_https_url])
     hero_image_alt = models.CharField(max_length=255, blank=True, default='')
     sort_order = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=True)
@@ -110,7 +117,7 @@ class PortfolioItem(models.Model):
         help_text="Cached category label matching frontend item.category"
     )
     media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES, default='image')
-    image_url = models.URLField(max_length=500, help_text="Maps to frontend 'src'")
+    image_url = models.URLField(max_length=500, validators=[validate_https_url], help_text="Maps to frontend 'src'")
     cloudinary_public_id = models.CharField(max_length=255, blank=True, default='')
     alt = models.CharField(max_length=255)
     aspect_ratio = models.CharField(max_length=20, choices=ASPECT_RATIO_CHOICES, default='landscape')
@@ -164,7 +171,13 @@ class Reel(models.Model):
     slug = models.SlugField(max_length=120, unique=True, db_index=True)
     title = models.CharField(max_length=255)
     category = models.CharField(max_length=100, choices=REEL_CATEGORY_CHOICES)
-    poster_url = models.URLField(max_length=500)
+    poster_url = models.URLField(
+        max_length=500,
+        blank=True,
+        default='',
+        validators=[validate_https_url],
+        help_text="Custom poster image URL (HTTPS). If left blank, defaults to YouTube HQ thumbnail."
+    )
     youtube_video_id = models.CharField(
         max_length=20,
         blank=True,
@@ -176,7 +189,7 @@ class Reel(models.Model):
         max_length=500,
         blank=True,
         default='',
-        help_text="Direct MP4 video URL for HTML5 player transition"
+        help_text="Direct MP4 video URL for legacy/HTML5 fallback"
     )
     duration = models.CharField(max_length=20, help_text="e.g. 0:45")
     aspect_ratio = models.CharField(max_length=20, choices=ASPECT_RATIO_CHOICES, default='vertical')
@@ -199,11 +212,18 @@ class Reel(models.Model):
         verbose_name_plural = 'Reels'
 
     def clean(self):
+        super().clean()
+        if self.is_published and not self.youtube_video_id:
+            raise ValidationError({'youtube_video_id': 'A YouTube video ID is required for published reels.'})
         if self.youtube_video_id:
             cleaned_id = extract_youtube_id(self.youtube_video_id)
             if not re.match(r'^[A-Za-z0-9_-]{11}$', cleaned_id):
                 raise ValidationError({'youtube_video_id': 'Enter a valid 11-character YouTube video ID.'})
             self.youtube_video_id = cleaned_id
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} ({self.category})"
@@ -228,8 +248,9 @@ class JournalPost(models.Model):
     published_date = models.CharField(max_length=50, help_text="Formatted date string matching UI, e.g. February 14, 2025")
     read_time = models.CharField(max_length=50, help_text="e.g. 5 min read")
     excerpt = models.TextField()
-    cover_image_url = models.URLField(max_length=500)
+    cover_image_url = models.URLField(max_length=500, validators=[validate_https_url])
     cover_alt = models.CharField(max_length=255)
+    cloudinary_public_id = models.CharField(max_length=255, blank=True, default='')
     location = models.CharField(max_length=255, blank=True, default='')
 
     # Article content fields
@@ -271,7 +292,7 @@ class ServiceGroup(models.Model):
     discipline = models.CharField(max_length=100, help_text="Discipline title, e.g. Photography")
     tagline = models.CharField(max_length=255)
     description = models.TextField()
-    hero_image_url = models.URLField(max_length=500)
+    hero_image_url = models.URLField(max_length=500, validators=[validate_https_url])
     image_alt = models.CharField(max_length=255)
     sort_order = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=True)
@@ -328,7 +349,8 @@ class SiteSettings(models.Model):
     contact_side_image_url = models.URLField(
         max_length=500,
         blank=True,
-        default='https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=1600&q=85'
+        default='https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=1600&q=85',
+        validators=[validate_https_url]
     )
     contact_side_image_alt = models.CharField(
         max_length=255,
@@ -405,7 +427,8 @@ class AboutProfile(models.Model):
     role = models.CharField(max_length=255, default='Photographer · Cinematographer · Drone Operator')
     portrait_src = models.URLField(
         max_length=500,
-        default='https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1600&q=85'
+        default='https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1600&q=85',
+        validators=[validate_https_url]
     )
     portrait_alt = models.CharField(
         max_length=255,

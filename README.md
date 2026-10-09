@@ -95,6 +95,29 @@ curl http://127.0.0.1:8000/api/health/
 
 ---
 
+## Media Architecture & CDN Conventions
+
+### 1. YouTube Reels & Motion Media
+* **Storage**: Reels store a validated 11-character YouTube video ID (`youtube_video_id`).
+* **Input Flexibility**: In Django Admin, you may paste a canonical 11-character ID, a standard URL (`https://www.youtube.com/watch?v=...`), a short link (`https://youtu.be/...`), or a shorts link (`https://www.youtube.com/shorts/...`). The backend automatically sanitizes and extracts the 11-character ID.
+* **Embed Security**: The API emits privacy-preserving, hardened embed URLs: `https://www.youtube-nocookie.com/embed/{youtubeVideoId}`. Raw embed HTML from clients is never accepted.
+* **Poster Fallback**: If a custom poster URL is omitted or left blank, the API automatically falls back to YouTube's high-definition thumbnail: `https://img.youtube.com/vi/{youtubeVideoId}/hqdefault.jpg`.
+* **Publication Rule**: Any reel with `is_published=True` strictly requires a valid YouTube video ID.
+
+### 2. Cloudinary & External Images
+* **Storage**: All still images are stored as absolute HTTPS URLs (`image_url`, `cover_image_url`, `hero_image_url`, `portrait_src`). Direct file blobs are never written to local EC2 application disk.
+* **Protocol Requirement**: Insecure `http://` or non-HTTPS schemes are rejected by model validators.
+* **Cloudinary Folder Conventions**: When managing assets in Cloudinary, organize assets under the following folder hierarchy:
+  * `prism-pulse/portfolio/` — Still photography, motion frames, aerial captures
+  * `prism-pulse/reels/` — Custom motion reel posters
+  * `prism-pulse/journal/` — Article cover imagery and field notes
+  * `prism-pulse/services/` — Discipline hero banners
+  * `prism-pulse/about/` — Studio portraits and artist profile photos
+  * `prism-pulse/site/` — Studio side image and brand assets
+* **Optional Public ID**: Models include an optional `cloudinary_public_id` field (e.g. `prism-pulse/portfolio/solitude-in-svalbard`) allowing future automated transforms (e.g. `f_auto,q_auto,w_1800`) and responsive `srcset` generation.
+
+---
+
 ## Deployment Note (Vercel)
 
 For existing or new Vercel deployments of the frontend:
@@ -104,3 +127,4 @@ For existing or new Vercel deployments of the frontend:
    frontend
    ```
 3. Save settings. Vercel will automatically detect the Vite preset and run `npm run build` from `frontend/`.
+

@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from rest_framework import serializers
 from apps.content.models import (
@@ -15,7 +16,9 @@ from apps.content.models import (
     Skill,
     EquipmentCategory,
     ProfessionalNote,
+    extract_youtube_id,
 )
+
 
 
 # ------------------------------------------------------------------------------
@@ -81,7 +84,7 @@ class PortfolioItemSerializer(serializers.ModelSerializer):
 # ------------------------------------------------------------------------------
 class ReelSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='slug')
-    poster = serializers.CharField(source='poster_url')
+    poster = serializers.SerializerMethodField()
     videoSrc = serializers.CharField(source='video_src', allow_blank=True, required=False)
     youtubeVideoId = serializers.CharField(source='youtube_video_id', allow_blank=True, required=False)
     embedUrl = serializers.SerializerMethodField()
@@ -107,10 +110,22 @@ class ReelSerializer(serializers.ModelSerializer):
             'description',
         ]
 
+    def get_poster(self, obj):
+        if obj.poster_url:
+            return obj.poster_url
+        if obj.youtube_video_id:
+            cleaned_id = extract_youtube_id(obj.youtube_video_id)
+            if re.match(r'^[A-Za-z0-9_-]{11}$', cleaned_id):
+                return f"https://img.youtube.com/vi/{cleaned_id}/hqdefault.jpg"
+        return ''
+
     def get_embedUrl(self, obj):
         if obj.youtube_video_id:
-            return f"https://www.youtube-nocookie.com/embed/{obj.youtube_video_id}"
+            cleaned_id = extract_youtube_id(obj.youtube_video_id)
+            if re.match(r'^[A-Za-z0-9_-]{11}$', cleaned_id):
+                return f"https://www.youtube-nocookie.com/embed/{cleaned_id}"
         return ''
+
 
 
 # ------------------------------------------------------------------------------

@@ -10,7 +10,10 @@ from apps.content.models import (
     JournalPost,
     SiteSettings,
     AboutProfile,
+    validate_https_url,
 )
+from apps.content.serializers import ReelSerializer
+
 
 
 class ContentModelConstraintTests(TestCase):
@@ -73,33 +76,112 @@ class ContentModelConstraintTests(TestCase):
         reel.save()
         self.assertEqual(reel.youtube_video_id, 'dQw4w9WgXcQ')
 
-        # Clean extracts ID from URL
-        reel_url = Reel(
-            slug='cinematic-reel-2',
-            title='Cinematic Reel 2',
-            category='Travel',
-            poster_url='https://example.com/poster.jpg',
-            youtube_video_id='https://www.youtube.com/watch?v=kJQP7kiw5Fk',
-            duration='1:00',
-            year='2025',
-            location='Italy'
-        )
-        reel_url.clean()
-        self.assertEqual(reel_url.youtube_video_id, 'kJQP7kiw5Fk')
+        # Clean extracts ID from URL formats
+        url_formats = [
+            'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+            'https://youtu.be/kJQP7kiw5Fk',
+            'https://www.youtube.com/shorts/kJQP7kiw5Fk',
+            'https://www.youtube-nocookie.com/embed/kJQP7kiw5Fk',
+        ]
+        for url in url_formats:
+            r = Reel(
+                slug='temp-reel',
+                title='Temp Reel',
+                category='Travel',
+                youtube_video_id=url,
+                duration='1:00',
+                year='2025',
+                location='Italy'
+            )
+            r.clean()
+            self.assertEqual(r.youtube_video_id, 'kJQP7kiw5Fk')
 
-        # Invalid ID triggers ValidationError
-        reel_invalid = Reel(
-            slug='cinematic-reel-3',
-            title='Invalid Reel',
+        # Published reel without YouTube ID triggers ValidationError
+        reel_missing_id = Reel(
+            slug='cinematic-reel-missing',
+            title='Missing ID Reel',
             category='Travel',
-            poster_url='https://example.com/poster.jpg',
-            youtube_video_id='too-short',
+            is_published=True,
+            youtube_video_id='',
             duration='1:00',
             year='2025',
             location='Italy'
         )
         with self.assertRaises(ValidationError):
-            reel_invalid.full_clean()
+            reel_missing_id.full_clean()
+
+        # Unpublished draft reel allows empty YouTube ID
+        reel_draft = Reel(
+            slug='cinematic-reel-draft',
+            title='Draft Reel',
+            category='Travel',
+            is_published=False,
+            youtube_video_id='',
+            duration='1:00',
+            year='2025',
+            location='Italy'
+        )
+        reel_draft.full_clean()
+        reel_draft.save()
+        self.assertEqual(reel_draft.youtube_video_id, '')
+
+        # Invalid ID triggers ValidationError
+        for invalid_id in ['too-short', 'waytoolong1234567890', 'invalid!char', 'javascript:alert(1)']:
+            reel_invalid = Reel(
+                slug='cinematic-reel-invalid',
+                title='Invalid Reel',
+                category='Travel',
+                poster_url='https://example.com/poster.jpg',
+                youtube_video_id=invalid_id,
+                duration='1:00',
+                year='2025',
+                location='Italy'
+            )
+            with self.assertRaises(ValidationError):
+                reel_invalid.full_clean()
+
+    def test_https_url_validation(self):
+        # Valid HTTPS URL
+        validate_https_url('https://images.unsplash.com/photo-123')
+
+        # Insecure or invalid schemes must raise ValidationError
+        with self.assertRaises(ValidationError):
+            validate_https_url('http://insecure.example.com/photo.jpg')
+
+        with self.assertRaises(ValidationError):
+            validate_https_url('javascript:alert(1)')
+
+    def test_reel_serializer_embed_url_and_poster_fallback(self):
+        # Reel with explicit poster
+        reel_with_poster = Reel.objects.create(
+            slug='reel-with-poster',
+            title='Reel With Poster',
+            category='Travel',
+            poster_url='https://example.com/custom-poster.jpg',
+            youtube_video_id='dQw4w9WgXcQ',
+            duration='1:00',
+            year='2025',
+            location='Italy'
+        )
+        data = ReelSerializer(reel_with_poster).data
+        self.assertEqual(data['poster'], 'https://example.com/custom-poster.jpg')
+        self.assertEqual(data['embedUrl'], 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
+
+        # Reel with empty poster URL falls back to YouTube HQ thumbnail
+        reel_empty_poster = Reel.objects.create(
+            slug='reel-no-poster',
+            title='Reel No Poster',
+            category='Travel',
+            poster_url='',
+            youtube_video_id='kJQP7kiw5Fk',
+            duration='1:00',
+            year='2025',
+            location='Italy'
+        )
+        data_empty = ReelSerializer(reel_empty_poster).data
+        self.assertEqual(data_empty['poster'], 'https://img.youtube.com/vi/kJQP7kiw5Fk/hqdefault.jpg')
+        self.assertEqual(data_empty['embedUrl'], 'https://www.youtube-nocookie.com/embed/kJQP7kiw5Fk')
+
 
     def test_journal_unique_slug(self):
         JournalPost.objects.create(
@@ -403,3 +485,40 @@ class PublicAPITests(TestCase):
         self.assertIn('?item=', sw['linkTarget'])
         for item in data['selectedWorks']:
             self.assertIn(item['discipline'], {'Photography', 'Cinematography', 'Drone'})
+
+    def test_all_public_api_image_urls_are_https(self):
+        # Portfolio items
+        portfolio_items = self.client.get('/api/portfolio/').json()
+        for item in portfolio_items:
+            self.assertTrue(item['src'].startswith('https://'), f"Insecure src: {item['src']}")
+
+        # Disciplines hero images
+        disciplines = self.client.get('/api/disciplines/').json()
+        for d in disciplines:
+            self.assertTrue(d['heroImage'].startswith('https://'), f"Insecure heroImage: {d['heroImage']}")
+
+        # Reels posters and embed URLs
+        reels = self.client.get('/api/reels/').json()
+        for r in reels:
+            self.assertTrue(r['poster'].startswith('https://'), f"Insecure poster: {r['poster']}")
+            self.assertTrue(r['embedUrl'].startswith('https://www.youtube-nocookie.com/embed/'), f"Insecure embedUrl: {r['embedUrl']}")
+
+        # Journal covers
+        journal_posts = self.client.get('/api/journal/').json()
+        for j in journal_posts:
+            self.assertTrue(j['coverImage'].startswith('https://'), f"Insecure coverImage: {j['coverImage']}")
+
+        # Services hero images
+        services = self.client.get('/api/services/').json()
+        for grp in services['groups']:
+            self.assertTrue(grp['heroImage'].startswith('https://'), f"Insecure service hero: {grp['heroImage']}")
+
+        # About portrait
+        about = self.client.get('/api/about/').json()
+        self.assertTrue(about['portrait']['src'].startswith('https://'))
+
+        # Site side image
+        site = self.client.get('/api/site/').json()
+        self.assertTrue(site['sideImage']['src'].startswith('https://'))
+
+

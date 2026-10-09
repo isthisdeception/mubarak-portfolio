@@ -1,17 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { homeData } from '../data/home';
+import type { SelectedWorkItem } from '../data/home';
+import { portfolioApi } from '../api/client';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export const Home: React.FC = () => {
   useDocumentTitle();
-  const { heroMedia, selectedWorks, selectedWorksSection } = homeData;
+  const { heroMedia, selectedWorksSection } = homeData;
+  const [selectedWorks, setSelectedWorks] = useState<SelectedWorkItem[]>(homeData.selectedWorks);
+
+  useEffect(() => {
+    portfolioApi
+      .getHome()
+      .then((data) => {
+        if (data.selectedWorks && data.selectedWorks.length > 0) {
+          setSelectedWorks(data.selectedWorks);
+        }
+      })
+      .catch((err) => {
+        console.warn('API unavailable; using bundled selected works fallback:', err);
+      });
+  }, []);
 
   // Split selected works for asymmetric editorial presentation
   const featuredFirst = selectedWorks[0];
   const pairItems = [selectedWorks[1], selectedWorks[2]];
   const wideItem = selectedWorks[3];
   const singleItem = selectedWorks[4];
+
 
   return (
     <div className="home-page reveal-fade">
