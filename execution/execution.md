@@ -1212,10 +1212,10 @@ End-to-end QA of frontend/backend, permissions, error handling, security setting
 
 ### Acceptance Criteria
 
-- [ ] All automated tests pass.
-- [ ] `frontend` production build succeeds.
-- [ ] Dual-server smoke path passes.
-- [ ] Security checklist documented (SECRET_KEY not in repo, DEBUG strategy, CORS origins, throttle on contact).
+- [x] All automated tests pass.
+- [x] `frontend` production build succeeds.
+- [x] Dual-server smoke path passes.
+- [x] Security checklist documented (SECRET_KEY not in repo, DEBUG strategy, CORS origins, throttle on contact).
 
 ### Local Verification
 

@@ -16,6 +16,16 @@ export const Home: React.FC = () => {
         setData((prev: HomeData) => ({
           ...prev,
           ...serverData,
+          heroMedia: {
+            ...prev.heroMedia,
+            ...(serverData.heroMedia || {}),
+            url:
+              serverData.heroMedia?.url && serverData.heroMedia.url.trim() !== ''
+                ? serverData.heroMedia.url
+                : prev.heroMedia.url,
+            alt: serverData.heroMedia?.alt || prev.heroMedia.alt,
+            caption: serverData.heroMedia?.caption || prev.heroMedia.caption,
+          },
           selectedWorks:
             serverData.selectedWorks && serverData.selectedWorks.length > 0
               ? serverData.selectedWorks
@@ -35,6 +45,8 @@ export const Home: React.FC = () => {
   const wideItem = selectedWorks[3];
   const singleItem = selectedWorks[4];
 
+  const activeHeroImg = heroMedia.url || homeData.heroMedia.url;
+
   return (
     <div className="home-page reveal-fade">
       {/* ====================================================================
@@ -44,10 +56,15 @@ export const Home: React.FC = () => {
         {/* Full-bleed atmospheric background image */}
         <div className="hero-backdrop-media">
           <img
-            src={heroMedia.url}
-            alt={heroMedia.alt}
+            src={activeHeroImg}
+            alt={heroMedia.alt || homeData.heroMedia.alt}
             className="hero-backdrop-img"
             loading="eager"
+            onError={(e) => {
+              if (e.currentTarget.src !== homeData.heroMedia.url) {
+                e.currentTarget.src = homeData.heroMedia.url;
+              }
+            }}
           />
           <div className="hero-vignette-overlay" aria-hidden="true" />
         </div>
